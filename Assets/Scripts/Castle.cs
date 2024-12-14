@@ -45,6 +45,8 @@ public class Castle : NetworkBehaviour
 
     private void SetCastleUniqueId()
     {
+        if(!IsHost) return;
+        
         castleUniqueId = Guid.NewGuid().ToString();
         SendUniqueIdToClientClientRpc(castleUniqueId);
     }
@@ -57,6 +59,10 @@ public class Castle : NetworkBehaviour
 
     public string GetCastleUniqueId()
     {
+        if (string.IsNullOrEmpty(castleUniqueId))
+        {
+            Debug.LogWarning("CastleUniqueId is not yet initialized on the client!");
+        }
         return castleUniqueId;
     }
     
@@ -70,6 +76,8 @@ public class Castle : NetworkBehaviour
 
     public void AddUnits(ulong clientId, int count)
     {
+        if(!IsHost) return;
+
         if (unitCounts.ContainsKey(clientId))
         {
             unitCounts[clientId] += count;
@@ -84,18 +92,18 @@ public class Castle : NetworkBehaviour
 
     public void RemoveUnits(ulong clientId, int count)
     {
+        RemoveUnitsServerRpc(clientId, count);
+    }
+
+    [ServerRpc]
+    private void RemoveUnitsServerRpc(ulong clientId, int count)
+    {
+        if(!IsHost) return;
+
         if (unitCounts.ContainsKey(clientId))
         {
             unitCounts[clientId] -= count;
-
-            /* Deleting player if he doesnt have units there
-            if (unitCounts[clientId] <= 0)
-            {
-                unitCounts.Remove(clientId);
-            }*/
         }
-
-        Debug.Log("Units Removed. Sending counts to clients");
         SendUnitCountsToClients();
     }
 
@@ -104,7 +112,6 @@ public class Castle : NetworkBehaviour
         // Проверяем, что словарь не пуст
         if (unitCounts == null || unitCounts.Count == 0)
         {
-            Debug.LogWarning("unitCounts пуст или равен null");
             return new List<KeyValuePair<ulong, int>>();
         }
 
@@ -125,8 +132,6 @@ public class Castle : NetworkBehaviour
     private void UpdateUnitCountsClientRpc(ulong[] keys, int[] values)
     {
         unitCounts = Util.ConvertArraysToDictionary(keys, values);
-        
-        Debug.Log("Client RPC received. Updating UI");
         UpdateLocalUnitCountUI();   
     }
 
@@ -134,7 +139,6 @@ public class Castle : NetworkBehaviour
     {
         if (unitCounts == null || unitCounts.Count == 0)
         {
-            Debug.LogWarning("unitCounts пуст, ничего не отправляется клиентам.");
             return;
         }
 
@@ -142,7 +146,6 @@ public class Castle : NetworkBehaviour
         int[] values;
         Util.ConvertDictionaryToArrays(unitCounts, out keys, out values);
 
-        Debug.Log("Sent units to clients. Sending clientRpc");
         UpdateUnitCountsClientRpc(keys, values);
     }
 
@@ -154,7 +157,6 @@ public class Castle : NetworkBehaviour
     {
         
         var topPlayers = GetTopThreePlayers();
-        Debug.Log($"Trying to update UI {topPlayers.Count}");
 
         for (int i = 0; i < topPlayers.Count; i++)
         {
@@ -163,7 +165,6 @@ public class Castle : NetworkBehaviour
 
             // Обновляем интерфейс для игрока
             unitCountTexts[i].text = unitCount.ToString();
-            Debug.Log($"Обновляем {i} игрока на число {topPlayers[i].Value}");
 
             // Обновляем цвет
             unitCountImages[i].GetComponent<Image>().color = GameManager.Instance.playerColors[clientId];

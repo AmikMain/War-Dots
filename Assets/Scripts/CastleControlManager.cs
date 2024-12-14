@@ -76,6 +76,7 @@ public class CastleControlManager : NetworkBehaviour
                     if(unitCount > 0)
                     {
                         SendUnitsServerRpc(unitCount, attackerCastle.transform.position, destination, NetworkManager.Singleton.LocalClientId, attackerCastle.GetCastleUniqueId());
+                        Debug.Log($"Step 1. Client. Asking castle to remove {unitCount} units.");
                         attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, unitCount);
                     }     
                 }
@@ -129,7 +130,6 @@ public class CastleControlManager : NetworkBehaviour
 
     public void RemoveFromSelection(Castle castle)
     {
-        Debug.Log("Final step of removing from selektion.");
         castle.SetCastleVisualSelection(false);
         selectedCastles.Remove(castle);
     }
