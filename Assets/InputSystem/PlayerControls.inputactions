@@ -33,6 +33,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Ctrl Click",
+                    "type": "Button",
+                    "id": "2545846a-5008-419c-9e32-06ef41d47df7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Alt Click",
+                    "type": "Button",
+                    "id": "20d5fbda-6804-4832-a93e-0c8479a1ec18",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Shift",
                     "type": "Button",
                     "id": "d55ec79b-03f8-4930-9d5e-23562d6435e4",
@@ -172,6 +190,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "RMB Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d1aac512-ac7a-459b-a932-a8ee38fbf870",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ctrl Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c50ab14c-ab5d-4cc2-9249-7a6e07563684",
+                    "path": "<Keyboard>/alt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Alt Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

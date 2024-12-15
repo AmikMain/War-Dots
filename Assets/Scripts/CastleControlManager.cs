@@ -13,6 +13,8 @@ public class CastleControlManager : NetworkBehaviour
     private List<Castle> selectedCastles = new List<Castle>();
     private Camera mainCamera;
     public bool shiftPressed = false;
+    public bool ctrlPressed = false;
+    public bool altPressed = false;
     
 
     private void Awake()
@@ -31,8 +33,16 @@ public class CastleControlManager : NetworkBehaviour
     private void Start() {
         InputManager.Instance.onShiftPerformed += ()=> shiftPressed = true;
         InputManager.Instance.onShiftCanceled += ()=> shiftPressed = false;
+
+        InputManager.Instance.onCtrlPerformed += ()=> ctrlPressed = true;
+        InputManager.Instance.onCtrlCanceled += ()=> ctrlPressed = false;
+
+        InputManager.Instance.onAltPerformed += ()=> altPressed = true;
+        InputManager.Instance.onAltCanceled += ()=> altPressed = false;
+
         InputManager.Instance.onLMBPerformed += OnLMBSelectCastle;
         InputManager.Instance.onRMBPerformed += OnRMBSendUnits;
+
         mainCamera = Camera.main;
     }
 
@@ -73,11 +83,25 @@ public class CastleControlManager : NetworkBehaviour
                 {
                     int unitCount = attackerCastle.GetUnitCount(NetworkManager.Singleton.LocalClientId);
 
-                    if(unitCount > 0)
+                    int attackingUnitCount;
+
+                    if(ctrlPressed)
                     {
-                        SendUnitsServerRpc(unitCount, attackerCastle.transform.position, destination, NetworkManager.Singleton.LocalClientId, attackerCastle.GetCastleUniqueId());
-                        Debug.Log($"Step 1. Client. Asking castle to remove {unitCount} units.");
-                        attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, unitCount);
+                        attackingUnitCount = Mathf.RoundToInt(unitCount * 0.5f);
+                    }
+                    else if(altPressed)
+                    {
+                        attackingUnitCount = Mathf.RoundToInt(unitCount * 0.1f);
+                    }
+                    else
+                    {
+                        attackingUnitCount = unitCount;
+                    }
+
+                    if(attackingUnitCount > 0)
+                    {
+                        SendUnitsServerRpc(attackingUnitCount, attackerCastle.transform.position, destination, NetworkManager.Singleton.LocalClientId, attackerCastle.GetCastleUniqueId());
+                        attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, attackingUnitCount);
                     }     
                 }
                 ClearSelection();

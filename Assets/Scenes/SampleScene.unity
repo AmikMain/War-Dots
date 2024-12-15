@@ -1817,6 +1817,38 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: cc9b7d7b-e61c-4284-a43e-6c90ac043cd5
     m_ActionName: Player/RMB Click[/Mouse/rightButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1013672317}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: CtrlClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 2545846a-5008-419c-9e32-06ef41d47df7
+    m_ActionName: Player/Ctrl Click[/Keyboard/ctrl]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1013672317}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: AltClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 20d5fbda-6804-4832-a93e-0c8479a1ec18
+    m_ActionName: Player/Alt Click[/Keyboard/alt]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
@@ -1935,6 +1967,8 @@ MonoBehaviour:
   unitPrefab: {fileID: 1914835843924984728, guid: b4b2cfc6a4825b84a82b94d224b0144e, type: 3}
   unitSpeed: 2
   shiftPressed: 0
+  ctrlPressed: 0
+  altPressed: 0
 --- !u!4 &1081166884
 Transform:
   m_ObjectHideFlags: 0

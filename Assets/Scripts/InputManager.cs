@@ -11,6 +11,10 @@ public class InputManager : MonoBehaviour
 
     public event Action onShiftPerformed;
     public event Action onShiftCanceled;
+    public event Action onCtrlPerformed;
+    public event Action onCtrlCanceled;
+    public event Action onAltPerformed;
+    public event Action onAltCanceled;
     public event Action onRMBPerformed;
     public event Action onRMBCanceled;
     public event Action onLMBPerformed;
@@ -74,6 +78,34 @@ public class InputManager : MonoBehaviour
         if(context.canceled)
         {
             onShiftCanceled?.Invoke();
+        }
+    }
+
+    public void CtrlClick(InputAction.CallbackContext context)
+    {
+        Debug.Log("CtrlClick");
+        if(context.performed)
+        {
+            onCtrlPerformed?.Invoke();
+        }
+
+        if(context.canceled)
+        {
+            onCtrlCanceled?.Invoke();
+        }
+    }
+
+    public void AltClick(InputAction.CallbackContext context)
+    {
+        Debug.Log("AltClick");
+        if(context.performed)
+        {
+            onAltPerformed?.Invoke();
+        }
+
+        if(context.canceled)
+        {
+            onAltCanceled?.Invoke();
         }
     }
 
