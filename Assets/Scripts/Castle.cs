@@ -14,9 +14,15 @@ public class Castle : NetworkBehaviour
     [SerializeField] private TMP_Text[] unitCountTexts;
     [SerializeField] private GameObject[] unitCountImages;
 
+    [Header("Unit Production")]
+    [SerializeField] private float unitProductionInterval;
+    [SerializeField] private int unitsPerInterval; 
+    [SerializeField] private bool producesUnits;
+
     private Dictionary<ulong, int> unitCounts = new Dictionary<ulong, int>();
     private string castleUniqueId;
     private Camera mainCamera;
+    private float unitProductionTimer = 0f;
 
     #region Unity Lifecycle Methods
 
@@ -24,6 +30,10 @@ public class Castle : NetworkBehaviour
         unitCountImages[0].GetComponent<MainBuildingUnitCountDisplay>().mouseOver += SetSecondaryUnitDisplayersState;
         SetCastleUniqueId();
         UpdateLocalUnitCountUI();
+    }
+
+    private void Update() {
+        ProduceUnits();
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
@@ -68,7 +78,51 @@ public class Castle : NetworkBehaviour
     
     #endregion
 
+    #region Ownership
+
+    private void UpdateCastleOwner()
+    {
+        //checking if there are any units at all
+
+        bool proceed = false;
+
+        foreach(KeyValuePair<ulong, int> pair in unitCounts)
+        {
+            if (pair.Value > 0)
+            {
+                proceed = true;
+            }
+        }
+
+        if (proceed != true) return;
+
+        var topPlayers = GetTopThreePlayers();
+
+        if(NetworkObject.OwnerClientId == topPlayers[0].Key) return;
+
+        GetComponent<NetworkObject>().ChangeOwnership(topPlayers[0].Key);
+
+        UpdateCastleColorClientRpc(GameManager.Instance.playerColors[topPlayers[0].Key]);
+    }
+
+    #endregion
+
     #region Unit Management
+
+    private void ProduceUnits()
+    {
+        if (!IsHost || !producesUnits) return;
+
+        unitProductionTimer += Time.deltaTime;
+
+        if (unitProductionTimer >= unitProductionInterval)
+        {
+            unitProductionTimer = 0f;
+
+            AddUnits(OwnerClientId, unitsPerInterval);
+        }
+    }
+
     public int GetUnitCount(ulong clientId)
     {
         return unitCounts.ContainsKey(clientId) ? unitCounts[clientId] : 0;
@@ -87,6 +141,7 @@ public class Castle : NetworkBehaviour
             unitCounts[clientId] = count;
         }
 
+        UpdateCastleOwner();
         SendUnitCountsToClients();
     }
 
@@ -104,6 +159,8 @@ public class Castle : NetworkBehaviour
         {
             unitCounts[clientId] -= count;
         }
+
+        UpdateCastleOwner();
         SendUnitCountsToClients();
     }
 

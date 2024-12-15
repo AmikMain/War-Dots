@@ -957,6 +957,9 @@ MonoBehaviour:
   - {fileID: 3262899731612141193}
   - {fileID: 3061486533402654101}
   - {fileID: 8276592821713003012}
+  unitProductionInterval: 5
+  unitsPerInterval: 5
+  producesUnits: 1
 --- !u!61 &1739979311346534126
 BoxCollider2D:
   m_ObjectHideFlags: 0
