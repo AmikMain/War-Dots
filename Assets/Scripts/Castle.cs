@@ -19,10 +19,15 @@ public class Castle : NetworkBehaviour
     [SerializeField] private int unitsPerInterval; 
     [SerializeField] private bool producesUnits;
 
+    [Header("Unit Combat")]
+    [SerializeField] private float unitBattleInterval;
+    [SerializeField] private int minDyingUnits;
+
     private Dictionary<ulong, int> unitCounts = new Dictionary<ulong, int>();
     private string castleUniqueId;
     private Camera mainCamera;
     private float unitProductionTimer = 0f;
+    private float unitBattleTimer = 0f;
 
     #region Unity Lifecycle Methods
 
@@ -33,7 +38,8 @@ public class Castle : NetworkBehaviour
     }
 
     private void Update() {
-        ProduceUnits();
+        ProduceUnitsCountdown();
+        BattleUnitsCountdown();
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
@@ -109,7 +115,44 @@ public class Castle : NetworkBehaviour
 
     #region Unit Management
 
-    private void ProduceUnits()
+    private void BattleUnitsCountdown()
+    {
+        if (!IsHost) return;
+
+        unitBattleTimer += Time.deltaTime;
+ 
+        if (unitBattleTimer >= unitBattleInterval)
+        {
+            unitBattleTimer = 0f;
+
+            BattleUnits();
+        }
+    }
+
+    private void BattleUnits()
+    {
+        var activePlayers = unitCounts
+        .Where(player => player.Value > 0)
+        .ToDictionary(player => player.Key, player => player.Value);
+
+        if (activePlayers.Count < 2) return;
+
+        // Находим игрока с наименьшим количеством юнитов
+        int minUnits = activePlayers.Min(player => player.Value);
+
+        // Потери пропорциональны минимальному количеству юнитов
+        int unitsLostPerPlayer = Mathf.Max(minUnits / 3, minDyingUnits); // Потери не могут быть меньше 5
+
+        foreach (var player in activePlayers)
+        {
+            ulong playerId = player.Key;
+        
+            // Вызываем метод RemoveUnits для удаления юнитов
+            RemoveUnitsServer(playerId, unitsLostPerPlayer); 
+        }
+    }
+
+    private void ProduceUnitsCountdown()
     {
         if (!IsHost || !producesUnits) return;
 
@@ -119,8 +162,19 @@ public class Castle : NetworkBehaviour
         {
             unitProductionTimer = 0f;
 
-            AddUnits(OwnerClientId, unitsPerInterval);
+            ProduceUnits();
         }
+    }
+
+    private void ProduceUnits()
+    {
+        var activePlayers = unitCounts
+        .Where(player => player.Value > 0)
+        .ToDictionary(player => player.Key, player => player.Value);
+
+        if (activePlayers.Count > 1) return;
+
+        AddUnits(OwnerClientId, unitsPerInterval);
     }
 
     public int GetUnitCount(ulong clientId)
@@ -153,12 +207,16 @@ public class Castle : NetworkBehaviour
     [ServerRpc]
     private void RemoveUnitsServerRpc(ulong clientId, int count)
     {
+        RemoveUnitsServer(clientId, count);
+    }
+
+    private void RemoveUnitsServer(ulong clientId, int count)
+    {
         if(!IsHost) return;
 
-        if (unitCounts.ContainsKey(clientId))
-        {
-            unitCounts[clientId] -= count;
-        }
+        if (!unitCounts.ContainsKey(clientId)) return;
+
+        unitCounts[clientId] = Mathf.Max(unitCounts[clientId] - count, 0);
 
         UpdateCastleOwner();
         SendUnitCountsToClients();

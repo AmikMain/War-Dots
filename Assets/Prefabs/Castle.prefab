@@ -960,6 +960,9 @@ MonoBehaviour:
   unitProductionInterval: 5
   unitsPerInterval: 5
   producesUnits: 1
+  unitBattleInterval: 2
+  minDyingUnits: 5
+  temp: 0
 --- !u!61 &1739979311346534126
 BoxCollider2D:
   m_ObjectHideFlags: 0
