@@ -9,6 +9,7 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Button StartHostButton;
     [SerializeField] private Button StartClientButton;
     [SerializeField] private Button StartGameButton;
+    [SerializeField] private TMP_InputField inputField;
     [SerializeField] private Button OpenButton;
     [SerializeField] private TMP_Text VersionText;
     [SerializeField] private Image colorDisplayImage;
@@ -28,6 +29,7 @@ public class MainMenuUI : MonoBehaviour
             StartHostButton.gameObject.SetActive(false);
             StartClientButton.gameObject.SetActive(false);
             StartGameButton.gameObject.SetActive(false);
+            inputField.gameObject.SetActive(false);
             showingToolkit = false;
         }
         else
@@ -36,6 +38,7 @@ public class MainMenuUI : MonoBehaviour
             StartHostButton.gameObject.SetActive(true);
             StartClientButton.gameObject.SetActive(true);
             StartGameButton.gameObject.SetActive(true);
+            inputField.gameObject.SetActive(true);
             showingToolkit = true;
         }
     }
