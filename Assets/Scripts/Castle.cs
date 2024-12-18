@@ -23,6 +23,10 @@ public class Castle : NetworkBehaviour
     [SerializeField] private float unitBattleInterval;
     [SerializeField] private int minDyingUnits;
 
+    [Header("Building")]
+    [SerializeField] private bool isFortification = false;
+    [SerializeField] private bool isOilRig = false;
+
     private Dictionary<ulong, int> unitCounts = new Dictionary<ulong, int>();
     private string castleUniqueId;
     private Camera mainCamera;
@@ -146,9 +150,16 @@ public class Castle : NetworkBehaviour
         foreach (var player in activePlayers)
         {
             ulong playerId = player.Key;
+
+            int unitsToLose = unitsLostPerPlayer;
+
+            if (isFortification && (playerId == GetTopThreePlayers()[0].Key))
+            {
+                unitsToLose += UnityEngine.Random.Range(0,5);
+            }
         
             // Вызываем метод RemoveUnits для удаления юнитов
-            RemoveUnitsServer(playerId, unitsLostPerPlayer); 
+            RemoveUnitsServer(playerId, unitsToLose); 
         }
     }
 

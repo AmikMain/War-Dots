@@ -7,14 +7,20 @@ using UnityEngine;
 
 public class GameManager : NetworkBehaviour
 {
+    // TODO produce oil in GameManager.
+
+    [Header("Settings")]
+    [SerializeField] TMP_Text oilText;
+    [SerializeField] GameObject CastlePrefab;
+
     public static GameManager Instance;
     private Color myPlayerColor;
     public event Action<Color> onColorChanged;
     public Dictionary<ulong, Color> playerColors = new Dictionary<ulong, Color>();
     private int oilCount = 0;
     private int startingOilAmount = 50;
-    [SerializeField] TMP_Text oilText;
-    [SerializeField] GameObject CastlePrefab;
+
+    private Castle[] oilRigs;
 
     private void Awake() {
 
@@ -183,5 +189,10 @@ public class GameManager : NetworkBehaviour
     public int GetOilCount()
     {
         return oilCount;
+    }
+
+    public Castle[] GetOilRigCount()
+    {
+        return oilRigs;
     }
 }

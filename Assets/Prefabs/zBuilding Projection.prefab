@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -495189218192572697}
   - component: {fileID: 6535476506257502428}
   m_Layer: 0
-  m_Name: Building Projection
+  m_Name: zBuilding Projection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

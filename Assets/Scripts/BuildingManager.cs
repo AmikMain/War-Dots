@@ -9,9 +9,12 @@ public class BuildingManager : NetworkBehaviour
 {
     [SerializeField] GameObject castlePrefab;
     [SerializeField] int castlePrice;
-    //[SerializeField] GameObject fortificationPrefab;
-    //[SerializeField] GameObject barracksPrefab;
-    //[SerializeField] GameObject oilRigPrefab;
+    [SerializeField] GameObject barracksPrefab;
+    [SerializeField] int barracksPrice;
+    [SerializeField] GameObject fortificationPrefab;
+    [SerializeField] int fotificationPrice;
+    [SerializeField] GameObject oilRigPrefab;
+    [SerializeField] int oilRigPrice;
     //[SerializeField] GameObject turretPrefab;
     //[SerializeField] GameObject artilleryPrefab;
     //[SerializeField] GameObject missleLauncherPrefab;
@@ -20,8 +23,8 @@ public class BuildingManager : NetworkBehaviour
     public enum BuildingType
     {
         Castle, 
-        Fortification,
         Barracks,
+        Fortification,  
         OilRig,
         Turret,
         Artillery,
@@ -33,8 +36,14 @@ public class BuildingManager : NetworkBehaviour
     private void AssignBuildings()
     {
         buildingList.Add(BuildingType.Castle, castlePrefab);
+        buildingList.Add(BuildingType.Barracks, barracksPrefab);
+        buildingList.Add(BuildingType.Fortification, fortificationPrefab);
+        buildingList.Add(BuildingType.OilRig, oilRigPrefab);
 
         buildingPriceList.Add(BuildingType.Castle, castlePrice);
+        buildingPriceList.Add(BuildingType.Barracks, barracksPrice);
+        buildingPriceList.Add(BuildingType.Fortification, fotificationPrice);
+        buildingPriceList.Add(BuildingType.OilRig, oilRigPrice);
     }
 
     public static BuildingManager Instance;

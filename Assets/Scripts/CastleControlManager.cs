@@ -98,7 +98,7 @@ public class CastleControlManager : NetworkBehaviour
                         attackingUnitCount = unitCount;
                     }
 
-                    if(attackingUnitCount > 0)
+                    if(attackingUnitCount > 0 && (attackerCastle.GetCastleUniqueId() != castle.GetCastleUniqueId()))
                     {
                         SendUnitsServerRpc(attackingUnitCount, attackerCastle.transform.position, destination, NetworkManager.Singleton.LocalClientId, attackerCastle.GetCastleUniqueId());
                         attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, attackingUnitCount);
