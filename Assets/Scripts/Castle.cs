@@ -277,6 +277,33 @@ public class Castle : NetworkBehaviour
 
     #endregion
 
+    #region Ownership Tracking
+
+    public override void OnNetworkSpawn()
+    {
+        if(IsHost)
+        {
+            OnGainedOwnership();
+        }
+    }
+
+    public override void OnGainedOwnership()
+    {
+        base.OnGainedOwnership();
+        Debug.Log($"Gained ownership on the building {this.ToString()}");
+        GameManager.Instance.AddCastle(this);
+    }
+
+    public override void OnLostOwnership()
+    {
+        base.OnLostOwnership();
+        Debug.Log($"Lost ownership on the building {this.ToString()}");
+        GameManager.Instance.RemoveCastle(this);
+    }
+
+
+    #endregion
+
     #region UI Management
 
     private void UpdateLocalUnitCountUI()
@@ -339,6 +366,15 @@ public class Castle : NetworkBehaviour
         buildingRenderer.material.color = state 
             ? new Color(buildingRenderer.material.color.r, buildingRenderer.material.color.g, buildingRenderer.material.color.b, 0.5f) 
             : new Color(buildingRenderer.material.color.r, buildingRenderer.material.color.g, buildingRenderer.material.color.b, 1f);
+    }
+
+    #endregion
+
+    #region Extra
+    
+    public bool IsOilRig()
+    {
+        return isOilRig;
     }
 
     #endregion

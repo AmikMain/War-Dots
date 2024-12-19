@@ -2455,8 +2455,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5096fcb757036246ae104d60412e377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oilText: {fileID: 1441103645}
   CastlePrefab: {fileID: 8805452232170320652, guid: a308e1e7c97756943ac6b3a6e33b7ca0, type: 3}
+  oilText: {fileID: 1441103645}
+  startingOilAmount: 50
+  oilProductionInterval: 10
+  oilAmountPerInterval: 5
 --- !u!4 &1032945019
 Transform:
   m_ObjectHideFlags: 0

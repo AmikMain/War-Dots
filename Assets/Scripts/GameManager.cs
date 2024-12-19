@@ -9,19 +9,25 @@ public class GameManager : NetworkBehaviour
 {
     // TODO produce oil in GameManager.
 
-    [Header("Settings")]
-    [SerializeField] TMP_Text oilText;
+    [Header("Prefabs")]
     [SerializeField] GameObject CastlePrefab;
+
+    [Header("Oil")]
+    [SerializeField] TMP_Text oilText;
+    [SerializeField] private int startingOilAmount;
+    [SerializeField] private int oilProductionInterval;
+    [SerializeField] private int oilAmountPerInterval;
+    private int oilCount = 0;
+    private float oilProductionTimer;
 
     public static GameManager Instance;
     private Color myPlayerColor;
     public event Action<Color> onColorChanged;
     public Dictionary<ulong, Color> playerColors = new Dictionary<ulong, Color>();
-    private int oilCount = 0;
-    private int startingOilAmount = 50;
+    private List<Castle> playerOwnedBuildings = new List<Castle>();
+    
 
-    private Castle[] oilRigs;
-
+    #region Main Methods
     private void Awake() {
 
         DontDestroyOnLoad(gameObject);
@@ -39,6 +45,10 @@ public class GameManager : NetworkBehaviour
 
     private void Start() {
         AssignLocalColor();
+    }
+
+    private void Update() {
+        ProduceOilCountdown();
     }
 
     public void TryStartGame()
@@ -164,10 +174,96 @@ public class GameManager : NetworkBehaviour
     {
         int randomIndex = UnityEngine.Random.Range(0, PlayerColors.PlayerColorsList.Length);
         myPlayerColor = PlayerColors.PlayerColorsList[randomIndex];
-        Debug.Log($"Был выбран цвет под индексом {randomIndex}");
         onColorChanged?.Invoke(myPlayerColor);
     }
 
+    #endregion
+
+    #region Buildings
+    public void AddCastle(Castle castle)
+    {
+        if (playerOwnedBuildings.Contains(castle)) return;
+
+        if (!castle.IsOwner) return;
+        
+        playerOwnedBuildings.Add(castle);
+        Debug.Log($"Adding a building. Building count is now {playerOwnedBuildings.Count}");
+    }
+
+    public void RemoveCastle(Castle castle)
+    {
+        if (!playerOwnedBuildings.Contains(castle)) return;
+
+        if (castle.IsOwner) return;
+        
+        playerOwnedBuildings.Remove(castle);
+        Debug.Log($"Removed a building. Building count is now {playerOwnedBuildings.Count}");
+    }
+    #endregion
+
+    #region Oil Rigs
+
+    private void ProduceOilCountdown()
+    {
+        oilProductionTimer += Time.deltaTime;
+
+        if (oilProductionTimer >= oilProductionInterval)
+        {
+            oilProductionTimer = 0f;
+
+            ProduceOil();
+        }
+    }
+
+    private void ProduceOil()
+    {
+        float oilFromOneOilRig = 0f;
+
+        int oilRigs = 0;
+
+        foreach (Castle building in playerOwnedBuildings)
+        {
+            if(building.IsOilRig()) oilRigs++;
+        }
+
+        if(oilRigs == 1)
+        {
+            oilFromOneOilRig = oilAmountPerInterval;
+        }
+        else if(oilRigs == 2)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.9f;
+        }
+        else if(oilRigs == 3)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.8f;
+        }
+        else if(oilRigs == 4)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.7f;
+        }
+        else if(oilRigs == 5)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.6f;
+        }
+        else if(oilRigs == 6)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.5f;
+        }
+        else if(oilRigs >= 7)
+        {
+            oilFromOneOilRig = oilAmountPerInterval * 0.45f;
+        }
+
+        Debug.Log($"Adding Oil: {(Mathf.RoundToInt(oilFromOneOilRig * oilRigs)).ToString()}");
+
+        ChangeOilAmount(Mathf.RoundToInt(oilFromOneOilRig * oilRigs));
+    }
+    
+
+    #endregion
+
+    #region Oil
     public void ChangeOilAmount(int amount)
     {
         oilCount += amount;
@@ -191,8 +287,5 @@ public class GameManager : NetworkBehaviour
         return oilCount;
     }
 
-    public Castle[] GetOilRigCount()
-    {
-        return oilRigs;
-    }
+    #endregion
 }
