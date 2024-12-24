@@ -237,6 +237,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitCountText: {fileID: 2342971667285611114}
+  normalSpeed: 15
+  slowSpeed: 7
 --- !u!114 &8410572255340106059
 MonoBehaviour:
   m_ObjectHideFlags: 0

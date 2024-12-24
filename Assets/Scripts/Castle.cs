@@ -281,10 +281,7 @@ public class Castle : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if(IsHost)
-        {
-            OnGainedOwnership();
-        }
+        OnGainedOwnership();
     }
 
     public override void OnGainedOwnership()

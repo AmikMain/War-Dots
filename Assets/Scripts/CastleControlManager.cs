@@ -7,7 +7,6 @@ using UnityEngine;
 public class CastleControlManager : NetworkBehaviour
 {
     [SerializeField] GameObject unitPrefab;
-    [SerializeField] private int unitSpeed = 10;
     public static CastleControlManager Instance;
     public event Action<List<Castle>> OnSelectionChanged;
     private List<Castle> selectedCastles = new List<Castle>();
@@ -120,7 +119,7 @@ public class CastleControlManager : NetworkBehaviour
 
         newUnit.GetComponent<Unit>().SetDestination(destination);
 
-        newUnit.GetComponent<Unit>().SetSpeed(unitSpeed);
+        newUnit.GetComponent<Unit>().ReturnToNormalSpeed();
 
         newUnit.GetComponent<Unit>().SetUnitsCount(unitCount);
 

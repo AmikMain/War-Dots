@@ -7,6 +7,9 @@ using UnityEngine;
 public class Unit : NetworkBehaviour
 {
     [SerializeField] TMP_Text unitCountText;
+    [SerializeField] int normalSpeed;
+    [SerializeField] int slowSpeed;
+    private float speedMultiplyer = 0.1f;
     private int unitCount;
     int currentSpeed;
     Vector3 destination;
@@ -16,7 +19,7 @@ public class Unit : NetworkBehaviour
         unitCountText.text = unitCount.ToString();
 
         if(destination == null) return;
-        transform.position = Vector3.MoveTowards(transform.position, destination, currentSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, destination, currentSpeed * Time.deltaTime * speedMultiplyer);
     }
 
     public void SendUnitDataToClients()
@@ -42,7 +45,7 @@ public class Unit : NetworkBehaviour
 
     public void RemoveUnits(int units)
     {
-        unitCount += units;
+        unitCount -= units;
         if(unitCount <= 0)
         {
             GetComponent<NetworkObject>().Despawn(true);
@@ -83,8 +86,13 @@ public class Unit : NetworkBehaviour
         GetComponent<SpriteRenderer>().color = newColor;
     }
 
-    public void SetSpeed(int newSpeed)
+    public void SlowDown()
     {
-        currentSpeed = newSpeed;
+        currentSpeed = slowSpeed;
+    }
+
+    public void ReturnToNormalSpeed()
+    {
+        currentSpeed = normalSpeed;
     }
 }

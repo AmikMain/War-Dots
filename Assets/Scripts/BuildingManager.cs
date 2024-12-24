@@ -15,8 +15,10 @@ public class BuildingManager : NetworkBehaviour
     [SerializeField] int fotificationPrice;
     [SerializeField] GameObject oilRigPrefab;
     [SerializeField] int oilRigPrice;
-    //[SerializeField] GameObject turretPrefab;
-    //[SerializeField] GameObject artilleryPrefab;
+    [SerializeField] GameObject artilleryPrefab;
+    [SerializeField] int artilleryPrice;
+    [SerializeField] GameObject turretPrefab;
+    [SerializeField] int turretPrice;
     //[SerializeField] GameObject missleLauncherPrefab;
     //[SerializeField] GameObject airDefencePrefab;
 
@@ -26,8 +28,8 @@ public class BuildingManager : NetworkBehaviour
         Barracks,
         Fortification,  
         OilRig,
-        Turret,
         Artillery,
+        Turret,
         MissleLauncher,
         AirDefence
     }
@@ -39,11 +41,15 @@ public class BuildingManager : NetworkBehaviour
         buildingList.Add(BuildingType.Barracks, barracksPrefab);
         buildingList.Add(BuildingType.Fortification, fortificationPrefab);
         buildingList.Add(BuildingType.OilRig, oilRigPrefab);
+        buildingList.Add(BuildingType.Artillery, artilleryPrefab);
+        buildingList.Add(BuildingType.Turret, turretPrefab);
 
         buildingPriceList.Add(BuildingType.Castle, castlePrice);
         buildingPriceList.Add(BuildingType.Barracks, barracksPrice);
         buildingPriceList.Add(BuildingType.Fortification, fotificationPrice);
         buildingPriceList.Add(BuildingType.OilRig, oilRigPrice);
+        buildingPriceList.Add(BuildingType.Artillery, artilleryPrice);
+        buildingPriceList.Add(BuildingType.Turret, turretPrice);
     }
 
     public static BuildingManager Instance;

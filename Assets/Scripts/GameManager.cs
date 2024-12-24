@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class GameManager : NetworkBehaviour
 {
-    // TODO produce oil in GameManager.
-
     [Header("Prefabs")]
     [SerializeField] GameObject CastlePrefab;
 
@@ -104,8 +102,6 @@ public class GameManager : NetworkBehaviour
 
         if(!IsHost) return;
 
-        Debug.Log("Spawning Castle for player.");
-
         Vector3 spawnPos = GetSpawnPosition();
 
         GameObject newCastle = Instantiate(CastlePrefab, spawnPos, Quaternion.identity);
@@ -138,8 +134,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void SendPlayerColorsClientRpc(ulong[] clientIds, Color[] colors)
     {
-        Debug.Log("Client. Receiving player colors...");
-
         playerColors = Util.ConvertArraysToDictionary(clientIds, colors);
 
         foreach (var pair in playerColors)
@@ -161,11 +155,8 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void ReceivePlayerColorServerRpc(ulong playerId, Color color)
     {
-        Debug.Log("Host. Received client color");
-
         if(!playerColors.ContainsKey(playerId))
         {
-            Debug.Log("Host. Client Color wasnt listed so it was added");
             playerColors.Add(playerId, color);
         }
     }
