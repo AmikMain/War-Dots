@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,7 +20,8 @@ public class BuildingManager : NetworkBehaviour
     [SerializeField] int artilleryPrice;
     [SerializeField] GameObject turretPrefab;
     [SerializeField] int turretPrice;
-    //[SerializeField] GameObject missleLauncherPrefab;
+    [SerializeField] GameObject siloPrefab;
+    [SerializeField] int siloPrice;
     //[SerializeField] GameObject airDefencePrefab;
 
     public enum BuildingType
@@ -30,7 +32,7 @@ public class BuildingManager : NetworkBehaviour
         OilRig,
         Artillery,
         Turret,
-        MissleLauncher,
+        Silo,
         AirDefence
     }
     public Dictionary<BuildingType, GameObject> buildingList = new Dictionary<BuildingType, GameObject>();
@@ -43,6 +45,7 @@ public class BuildingManager : NetworkBehaviour
         buildingList.Add(BuildingType.OilRig, oilRigPrefab);
         buildingList.Add(BuildingType.Artillery, artilleryPrefab);
         buildingList.Add(BuildingType.Turret, turretPrefab);
+        buildingList.Add(BuildingType.Silo, siloPrefab);
 
         buildingPriceList.Add(BuildingType.Castle, castlePrice);
         buildingPriceList.Add(BuildingType.Barracks, barracksPrice);
@@ -50,6 +53,7 @@ public class BuildingManager : NetworkBehaviour
         buildingPriceList.Add(BuildingType.OilRig, oilRigPrice);
         buildingPriceList.Add(BuildingType.Artillery, artilleryPrice);
         buildingPriceList.Add(BuildingType.Turret, turretPrice);
+        buildingPriceList.Add(BuildingType.Silo, siloPrice);
     }
 
     public static BuildingManager Instance;
@@ -94,6 +98,7 @@ public class BuildingManager : NetworkBehaviour
         {
             FinishBuildingServerRpc(NetworkManager.Singleton.LocalClientId, currentBuildingType, new Vector3(buildingPosition.x, buildingPosition.y, 0));
             GameManager.Instance.ChangeOilAmount(-buildingPriceList[currentBuildingType]);
+            IncreaseBuildingPrice(currentBuildingType);
             CastleControlManager.Instance.ClearSelection();
             StopBuilding();
         }
@@ -158,6 +163,38 @@ public class BuildingManager : NetworkBehaviour
         else
         {
             StopBuilding();
+        }
+    }
+
+    public void IncreaseBuildingPrice(BuildingType buildingType)
+    {
+        int newPrice;
+
+        if (buildingType == BuildingType.OilRig)
+        {
+            newPrice = buildingPriceList[buildingType] + Mathf.RoundToInt(buildingPriceList[buildingType] * 0.8f);
+        }
+        else
+        {
+            newPrice = buildingPriceList[buildingType] + Mathf.RoundToInt(buildingPriceList[buildingType] * 0.5f);
+        }
+        
+
+        buildingPriceList[buildingType] = newPrice;
+
+        UpdatePriceUI(buildingType, newPrice);
+    }
+
+    private void UpdatePriceUI(BuildingType buildingType, int price)
+    {
+        BuildingCell[] buildingCells = FindObjectsOfType<BuildingCell>();
+
+        foreach(BuildingCell cell in buildingCells)
+        {
+            if(cell.GetBuildingType() == buildingType)
+            {
+                cell.gameObject.GetComponentInChildren<TMP_Text>().text = price.ToString();
+            }
         }
     }
 }

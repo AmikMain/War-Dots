@@ -17,7 +17,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private int oilAmountPerInterval;
     private int oilCount = 0;
     private float oilProductionTimer;
-
+    private bool gameStarted = false;
     public static GameManager Instance;
     private Color myPlayerColor;
     public event Action<Color> onColorChanged;
@@ -69,6 +69,17 @@ public class GameManager : NetworkBehaviour
 
         yield return new WaitForSeconds(1.0f);
 
+        // Check for repeating player colors
+        HashSet<Color> uniqueColors = new HashSet<Color>();
+        foreach (var color in playerColors.Values)
+        {
+            if (!uniqueColors.Add(color))
+            {
+                UIManager.Instance.ShowWarning("Some players have the same color. Please change one of them.");
+                yield break;
+            }
+        }
+
         if(NetworkManager.Singleton.ConnectedClientsIds.Count == playerColors.Count)
         {
             ulong[] clientIds;
@@ -83,7 +94,7 @@ public class GameManager : NetworkBehaviour
                 SpawnCastleForPlayer(clientId);
             }
 
-            SetOilAmountClientRpc();
+            StartGameClientRpc();
         }
         else
         {
@@ -95,6 +106,18 @@ public class GameManager : NetworkBehaviour
             //Adding colors of clients
             SendPlayerColorClientRpc(); 
         }
+    }
+
+    [ClientRpc]
+    private void StartGameClientRpc()
+    {
+        SetOilAmount();
+
+        gameStarted = true;
+
+        UIManager.Instance.ShowGameUI();
+
+        UIManager.Instance.ShowTooltip();
     }
 
     private void SpawnCastleForPlayer(ulong clientId)
@@ -168,6 +191,36 @@ public class GameManager : NetworkBehaviour
         onColorChanged?.Invoke(myPlayerColor);
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void DeletePlayerServerRpc(ulong clientId)
+    {
+        playerColors.Remove(clientId);
+
+        UpdateLobbyDataClientRpc(UIManager.Instance.GetJoinCode(), playerColors.Count);
+    }
+
+    #endregion
+
+    #region Lobby
+
+    [ServerRpc(RequireOwnership = false)]
+    public void AskForLobbyDataUpdateServerRpc()
+    {
+        Debug.Log($"Sending client following data: JoinCode:{UIManager.Instance.GetJoinCode()}, player count: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
+
+        UpdateLobbyDataClientRpc(UIManager.Instance.GetJoinCode(), NetworkManager.Singleton.ConnectedClientsIds.Count);
+    }
+
+    [ClientRpc]
+    public void UpdateLobbyDataClientRpc(string lobbyCode, int playerCount)
+    {
+        Debug.Log($"Updating Lobby Data. Lobby code: {lobbyCode}, Players: {playerCount}");
+
+        UIManager.Instance.SetJoinCodeText(lobbyCode);
+
+        UIManager.Instance.SetPlayerCountText(playerCount);
+    }
+
     #endregion
 
     #region Buildings
@@ -178,7 +231,6 @@ public class GameManager : NetworkBehaviour
         if (!castle.IsOwner) return;
         
         playerOwnedBuildings.Add(castle);
-        Debug.Log($"Adding a building. Building count is now {playerOwnedBuildings.Count}");
     }
 
     public void RemoveCastle(Castle castle)
@@ -188,7 +240,6 @@ public class GameManager : NetworkBehaviour
         if (castle.IsOwner) return;
         
         playerOwnedBuildings.Remove(castle);
-        Debug.Log($"Removed a building. Building count is now {playerOwnedBuildings.Count}");
     }
     #endregion
 
@@ -246,8 +297,6 @@ public class GameManager : NetworkBehaviour
             oilFromOneOilRig = oilAmountPerInterval * 0.45f;
         }
 
-        Debug.Log($"Adding Oil: {(Mathf.RoundToInt(oilFromOneOilRig * oilRigs)).ToString()}");
-
         ChangeOilAmount(Mathf.RoundToInt(oilFromOneOilRig * oilRigs));
     }
     
@@ -266,8 +315,7 @@ public class GameManager : NetworkBehaviour
         oilText.text = oilCount.ToString();
     }
 
-    [ClientRpc]
-    public void SetOilAmountClientRpc()
+    public void SetOilAmount()
     {
         oilCount = 0;
         ChangeOilAmount(startingOilAmount);

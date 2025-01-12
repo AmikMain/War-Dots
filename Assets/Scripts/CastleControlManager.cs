@@ -1,12 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
 public class CastleControlManager : NetworkBehaviour
 {
+    #region Main
+
     [SerializeField] GameObject unitPrefab;
+    [SerializeField] private LayerMask castleLayer;
     public static CastleControlManager Instance;
     public event Action<List<Castle>> OnSelectionChanged;
     private List<Castle> selectedCastles = new List<Castle>();
@@ -14,7 +18,6 @@ public class CastleControlManager : NetworkBehaviour
     public bool shiftPressed = false;
     public bool ctrlPressed = false;
     public bool altPressed = false;
-    
 
     private void Awake()
     {
@@ -43,70 +46,106 @@ public class CastleControlManager : NetworkBehaviour
         InputManager.Instance.onRMBPerformed += OnRMBSendUnits;
 
         mainCamera = Camera.main;
+
+        SetMissilePrice();
     }
 
     private void OnLMBSelectCastle()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition); // Создаём луч из позиции мыши
-        RaycastHit2D hit = Physics2D.GetRayIntersection(ray); // Проверяем пересечение с объектами
+        RaycastHit2D[] hits = Physics2D.GetRayIntersectionAll(ray); // Получаем все пересечения
 
-        if (hit.collider != null) // Если что-то было кликнуто
+        Castle selectedCastle = null;
+
+        foreach (var hit in hits)
         {
-            Castle castle = hit.collider.GetComponent<Castle>(); // Проверяем, есть ли компонент "Building"
-
+            Castle castle = hit.collider.GetComponent<Castle>();
             if (castle != null && castle.IsOwner)
             {
-                Select(castle);
+                selectedCastle = castle;
+                break; // Приоритетно выбираем первый найденный замок
             }
+        }
+
+        if (selectedCastle != null)
+        {
+            Select(selectedCastle);
         }
         else
         {
             ClearSelection();
         }
+
+        CheckForSilos();
     }
+
+    
 
     private void OnRMBSendUnits()
     {
         Vector3 destination;
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition); // Создаём луч из позиции мыши
-        RaycastHit2D hit = Physics2D.GetRayIntersection(ray); // Проверяем пересечение с объектами
 
-        if (hit.collider != null) // Если что-то было кликнуто
+        // Создаём луч из позиции мыши
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+
+        // Получаем все пересечения
+        RaycastHit2D[] hits = Physics2D.GetRayIntersectionAll(ray);
+
+        Castle targetCastle = null;
+
+        // Ищем замок в пересечениях
+        foreach (var hit in hits)
         {
-            Castle castle = hit.collider.GetComponent<Castle>(); // Проверяем, есть ли компонент "Building"
-
+            Castle castle = hit.collider.GetComponent<Castle>();
             if (castle != null)
             {
-                destination = castle.transform.position;
-                foreach(Castle attackerCastle in selectedCastles)
-                {
-                    int unitCount = attackerCastle.GetUnitCount(NetworkManager.Singleton.LocalClientId);
-
-                    int attackingUnitCount;
-
-                    if(ctrlPressed)
-                    {
-                        attackingUnitCount = Mathf.RoundToInt(unitCount * 0.5f);
-                    }
-                    else if(altPressed)
-                    {
-                        attackingUnitCount = Mathf.RoundToInt(unitCount * 0.1f);
-                    }
-                    else
-                    {
-                        attackingUnitCount = unitCount;
-                    }
-
-                    if(attackingUnitCount > 0 && (attackerCastle.GetCastleUniqueId() != castle.GetCastleUniqueId()))
-                    {
-                        SendUnitsServerRpc(attackingUnitCount, attackerCastle.transform.position, destination, NetworkManager.Singleton.LocalClientId, attackerCastle.GetCastleUniqueId());
-                        attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, attackingUnitCount);
-                    }     
-                }
-                ClearSelection();
+                targetCastle = castle;
+                break; // Останавливаемся на первом найденном замке
             }
         }
+
+        if (targetCastle != null)
+        {
+            destination = targetCastle.transform.position;
+
+            foreach (Castle attackerCastle in selectedCastles)
+            {
+                int unitCount = attackerCastle.GetUnitCount(NetworkManager.Singleton.LocalClientId);
+
+                int attackingUnitCount;
+
+                if (ctrlPressed)
+                {
+                    attackingUnitCount = Mathf.RoundToInt(unitCount * 0.5f);
+                }
+                else if (altPressed)
+                {
+                    attackingUnitCount = Mathf.RoundToInt(unitCount * 0.1f);
+                }
+                else
+                {
+                    attackingUnitCount = unitCount;
+                }
+
+                // Убедимся, что отправляем войска только в другие замки
+                if (attackingUnitCount > 0 && attackerCastle.GetCastleUniqueId() != targetCastle.GetCastleUniqueId())
+                {
+                    SendUnitsServerRpc(
+                    attackingUnitCount,
+                    attackerCastle.transform.position,
+                    destination,
+                    NetworkManager.Singleton.LocalClientId,
+                    attackerCastle.GetCastleUniqueId()
+                    );
+
+                    attackerCastle.RemoveUnits(NetworkManager.Singleton.LocalClientId, attackingUnitCount);
+                }
+            }
+
+            ClearSelection();
+        }
     }
+    
 
     [ServerRpc(RequireOwnership = false)]
     private void SendUnitsServerRpc(int unitCount, Vector3 spawnPos, Vector3 destination, ulong clientIdOfAttacker, string castleUniqueId)
@@ -170,4 +209,83 @@ public class CastleControlManager : NetworkBehaviour
             OnSelectionChanged?.Invoke(selectedCastles); // Уведомляем об изменении выделения
         }
     }
+
+    #endregion
+
+    #region Silo and Missiles
+
+    [SerializeField] GameObject missleLaunchButton;
+    [SerializeField] int missilePrice;
+
+    private void SetMissilePrice() {
+        missleLaunchButton.GetComponentInChildren<TMP_Text>().text = missilePrice.ToString();
+    }
+
+    // TODO: Make missiles launch when you press the button, going into launching mode, and then press LMB to launch them
+    public void TryLaunchRockets(Vector3 targetCoordinates)
+    {
+        int oilNeeded = CheckForNeededOil();
+
+        if(oilNeeded > GameManager.Instance.GetOilCount())
+        {
+            return;
+        }
+
+        GameManager.Instance.ChangeOilAmount(-oilNeeded);
+
+        foreach(Castle castle in selectedCastles)
+        {
+            castle.TryGetComponent<Silo>(out Silo silo);
+            if(silo != null)
+            {
+                silo.LaunchMissile(targetCoordinates);
+            }
+        }  
+    }
+
+    private int CheckForNeededOil()
+    {
+        int siloCount = 0;
+
+        foreach(Castle castle in selectedCastles)
+        {
+            castle.TryGetComponent<Silo>(out Silo silo);
+            if(silo != null)
+            {
+                siloCount++;
+            }
+        }
+
+        return siloCount * missilePrice;
+    }
+
+    private void CheckForSilos()
+    {
+        int siloCount = 0;
+
+        foreach(Castle castle in selectedCastles)
+        {
+            castle.TryGetComponent<Silo>(out Silo silo);
+            if(silo != null)
+            {
+                siloCount++;
+            }
+        }
+
+            if(siloCount > 0)
+            {
+                ShowMissileLaunchButton(true);
+            }
+            else
+            {
+                ShowMissileLaunchButton(false);
+            }
+    }
+
+    public void ShowMissileLaunchButton(bool show)
+    {
+        missleLaunchButton.SetActive(show);
+    }
+
+    #endregion
 }

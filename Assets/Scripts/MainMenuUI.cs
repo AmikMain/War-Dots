@@ -16,7 +16,6 @@ public class MainMenuUI : MonoBehaviour
     private bool showingToolkit = false;
 
     private void Start() {
-        VersionText.text = "Build " + Application.version;
         GameManager.Instance.onColorChanged += DisplayColor;
     }
 

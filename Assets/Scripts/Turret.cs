@@ -49,12 +49,7 @@ public class Turret : NetworkBehaviour
 
     private void RotateTurret()
     {
-        Debug.Log("Trying to rotate turret");
-
         if(currentTarget == null) return;
-
-        Debug.Log("Rotating turret");
-
         Vector3 direction = targetPosition - TurretPivot.transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f; // Adjust angle by 90 degrees
         TurretPivot.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);

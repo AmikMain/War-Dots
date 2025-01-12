@@ -4,13 +4,41 @@ using UnityEngine;
 
 public class BuildingProjection : MonoBehaviour
 {
-    private void OnTriggerStay2D(Collider2D other) {
-        Debug.Log("staying in the trigga");
-        BuildingManager.Instance.AllowToBuild(false);
+    private void Update() {
+        if(CanPlaceBuilding())
+        {
+            BuildingManager.Instance.AllowToBuild(true);
+        } else
+        {
+            BuildingManager.Instance.AllowToBuild(false);
+        }
     }
 
-    private void OnTriggerExit2D(Collider2D other) {
-        Debug.Log("allowing to build!");
-        BuildingManager.Instance.AllowToBuild(true);
+    bool CanPlaceBuilding()
+{
+    Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    mouseWorldPosition.z = 0; // Убираем ось Z для 2D
+
+    // Проверяем "SpawnRange"
+    Collider2D[] colliders = Physics2D.OverlapCircleAll(mouseWorldPosition, 0.5f);
+    bool isSpawnRange = false;
+    foreach (var collider in colliders)
+    {
+        if (collider.CompareTag("SpawnRange"))
+        {
+            isSpawnRange = true;
+        }
+        if (collider.CompareTag("Building"))
+        {
+            Debug.Log("Касается 'Untagged'. Строить нельзя.");
+            return false;
+        }
     }
+    if (isSpawnRange)
+    {
+        return true;
+    }
+    return false;
 }
+}
+

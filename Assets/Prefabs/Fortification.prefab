@@ -841,9 +841,9 @@ GameObject:
   - component: {fileID: -4970393293107924663}
   - component: {fileID: 4764648862208267300}
   - component: {fileID: 1739979311346534126}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Fortification
-  m_TagString: Untagged
+  m_TagString: Building
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -958,11 +958,12 @@ MonoBehaviour:
   - {fileID: 3061486533402654101}
   - {fileID: 8276592821713003012}
   unitProductionInterval: 5
-  unitsPerInterval: 5
+  unitsPerInterval: 2
   producesUnits: 1
   unitBattleInterval: 2
   minDyingUnits: 5
   isFortification: 1
+  isOilRig: 0
 --- !u!61 &1739979311346534126
 BoxCollider2D:
   m_ObjectHideFlags: 0

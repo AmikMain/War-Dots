@@ -840,10 +840,11 @@ GameObject:
   - component: {fileID: 3594291906831650449}
   - component: {fileID: -4970393293107924663}
   - component: {fileID: 4764648862208267300}
+  - component: {fileID: 6586049190367041186}
   - component: {fileID: 1739979311346534126}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: RocketSilo
-  m_TagString: Untagged
+  m_TagString: Building
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -964,6 +965,18 @@ MonoBehaviour:
   minDyingUnits: 5
   isFortification: 0
   isOilRig: 0
+--- !u!114 &6586049190367041186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8805452232170320652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5cee8a65f9f4234cbe4310d6d47f77b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!61 &1739979311346534126
 BoxCollider2D:
   m_ObjectHideFlags: 0

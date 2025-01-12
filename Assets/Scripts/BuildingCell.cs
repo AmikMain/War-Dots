@@ -22,4 +22,8 @@ public class BuildingCell : MonoBehaviour
         BuildingManager.Instance.OnBuildButtonPressed(buildingType);
     }
 
+    public BuildingType GetBuildingType()
+    {
+        return buildingType;
+    }
 }
