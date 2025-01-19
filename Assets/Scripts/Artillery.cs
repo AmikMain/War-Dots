@@ -16,7 +16,7 @@ public class Artillery : NetworkBehaviour
 
         if(unit == null) return;
 
-        if(!unit.IsOwner) {
+        if(unit.OwnerClientId != OwnerClientId) {
             enemiesInRange.Add(unit);
             FindClosestUnit();
         }
@@ -29,11 +29,9 @@ public class Artillery : NetworkBehaviour
 
         if(unit == null) return;
 
-        if(true) {
-            enemiesInRange.Remove(unit);
-            unit.ReturnToNormalSpeed();
-            FindClosestUnit();
-        }
+        enemiesInRange.Remove(unit);
+        unit.ReturnToNormalSpeed();
+        FindClosestUnit();
     }
 
     private void FindClosestUnit()
